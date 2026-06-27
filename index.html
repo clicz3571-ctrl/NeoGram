@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoGram — Telegram переосмыслен</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👻</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(180deg, #0a0e14 0%, #0f1419 50%, #0a0e14 100%);
+            color: #e0e6ed;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .blob1 {
+            width: 400px;
+            height: 400px;
+            background: #2AABEE;
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .blob2 {
+            width: 300px;
+            height: 300px;
+            background: #00BCD4;
+            top: 50%;
+            right: -50px;
+            animation-delay: 5s;
+        }
+
+        .blob3 {
+            width: 350px;
+            height: 350px;
+            background: #2AABEE;
+            bottom: -100px;
+            left: 10%;
+            animation-delay: 10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, -30px); }
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(15, 20, 25, 0.95);
+            padding: 1.2rem 2rem;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-icon {
+            font-size: 32px;
+            filter: drop-shadow(0 0 8px rgba(42, 171, 238, 0.4));
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+        }
+
+        nav a {
+            color: #a0a8b0;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        nav a:hover {
+            color: #2AABEE;
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 100px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(42, 171, 238, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-icon {
+            font-size: 160px;
+            margin-bottom: 30px;
+            display: inline-block;
+            filter: drop-shadow(0 20px 50px rgba(42, 171, 238, 0.2));
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .hero-content h1 {
+            font-size: 72px;
+            margin-bottom: 20px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            background: linear-gradient(120deg, #fff 0%, #a0a8b0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-content .tagline {
+            font-size: 18px;
+            color: #a0a8b0;
+            margin-bottom: 50px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: 400;
+            line-height: 1.8;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+
+        .btn {
+            padding: 14px 40px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2AABEE 0%, #00BCD4 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(42, 171, 238, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(42, 171, 238, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: #e0e6ed;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .version {
+            font-size: 12px;
+            color: #666;
+            margin-top: 20px;
+        }
+
+        /* Features Section */
+        .features {
+            max-width: 1400px;
+            margin: 140px auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            font-size: 56px;
+            text-align: center;
+            margin-bottom: 80px;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 40px 30px;
+            transition: all 0.4s;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(42, 171, 238, 0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+            z-index: 0;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(42, 171, 238, 0.3);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(42, 171, 238, 0.1);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: inline-block;
+            filter: drop-shadow(0 4px 12px rgba(42, 171, 238, 0.2));
+        }
+
+        .feature-card h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .feature-card p {
+            color: #a0a8b0;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        /* Stats Section */
+        .stats {
+            max-width: 1400px;
+            margin: 140px auto;
+            padding: 0 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s;
+        }
+
+        .stat-item:hover {
+            border-color: rgba(42, 171, 238, 0.2);
+            background: rgba(42, 171, 238, 0.05);
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 800;
+            color: #2AABEE;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #a0a8b0;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Keyboard Shortcuts */
+        .shortcuts {
+            max-width: 1400px;
+            margin: 140px auto;
+            padding: 60px 40px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+        }
+
+        .shortcuts h2 {
+            margin-bottom: 40px;
+            font-size: 36px;
+        }
+
+        .shortcuts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .shortcut {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .shortcut-key {
+            background: rgba(42, 171, 238, 0.15);
+            border: 1px solid rgba(42, 171, 238, 0.3);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-family: 'Monaco', monospace;
+            font-size: 12px;
+            color: #2AABEE;
+            font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .shortcut-desc {
+            color: #a0a8b0;
+            font-size: 14px;
+        }
+
+        /* Support Section */
+        .support {
+            max-width: 1400px;
+            margin: 140px auto;
+            padding: 80px 40px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(42, 171, 238, 0.08) 0%, rgba(0, 188, 212, 0.08) 100%);
+            border-radius: 24px;
+            border: 1px solid rgba(42, 171, 238, 0.2);
+        }
+
+        .support h2 {
+            font-size: 44px;
+            margin-bottom: 20px;
+        }
+
+        .support p {
+            font-size: 18px;
+            color: #a0a8b0;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .support-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 45px;
+            background: linear-gradient(135deg, #2AABEE 0%, #00BCD4 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(42, 171, 238, 0.3);
+        }
+
+        .support-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(42, 171, 238, 0.4);
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(15, 20, 25, 0.8);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 60px 20px;
+            text-align: center;
+            color: #666;
+            margin-top: 140px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #2AABEE;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: #00BCD4;
+        }
+
+        .footer-copy {
+            font-size: 12px;
+            color: #444;
+            margin-top: 30px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 42px;
+            }
+
+            .hero-icon {
+                font-size: 100px;
+            }
+
+            .section-title {
+                font-size: 36px;
+                margin-bottom: 50px;
+            }
+
+            .nav-links {
+                gap: 20px;
+                font-size: 12px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+
+            .hero-content .tagline {
+                font-size: 16px;
+            }
+        }
+
+        /* Loading animation */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+        <div class="blob blob3"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-icon">👻</span>
+                <span>NeoGram</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features">Возможности</a>
+                <a href="#shortcuts">Горячие клавиши</a>
+                <a href="#support">Поддержка</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-icon">👻</div>
+            <h1>NeoGram</h1>
+            <p class="tagline">Telegram, переосмыслен. Красивый интерфейс, полная кастомизация, твой полный контроль.</p>
+            <div class="cta-buttons">
+                <a href="#" class="btn btn-primary">⬇️ Скачать</a>
+                <a href="https://t.me/exstazyas" class="btn btn-secondary" target="_blank">💬 Написать</a>
+            </div>
+            <p class="version">v1.0 • Windows 10/11 • 300 МБ</p>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <h2 class="section-title">Возможности</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-content">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Кастомный дизайн</h3>
+                    <p>Интерфейс как в Telegram Desktop, но полностью под твой вкус. Твой логотип, твой стиль.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-content">
+                    <div class="feature-icon">🖼️</div>
+                    <h3>Фоны и картинки</h3>
+                    <p>Поставь любое изображение или GIF-анимацию фоном в чатах. Просто нажми Ctrl+B.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-content">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Быстрая работа</h3>
+                    <p>Минимум зависимостей, быстрый запуск, низкое потребление оперативной памяти.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-content">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Полная безопасность</h3>
+                    <p>Все данные хранятся локально. Никакие данные не передаются на чужие серверы.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-content">
+                    <div class="feature-icon">🌙</div>
+                    <h3>Тёмная тема по умолчанию</h3>
+                    <p>Красивая современная тёмная тема, удобная для глаз в любое время суток.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-content">
+                    <div class="feature-icon">☁️</div>
+                    <h3>Синхронизация с облаком</h3>
+                    <p>Вся история, контакты и сообщения синхронизируются с облаком Telegram.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <h2 class="section-title">Характеристики</h2>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">Windows</div>
+                <div class="stat-label">10, 11 (x64)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">300 МБ</div>
+                <div class="stat-label">Размер</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">Бесплатно</div>
+                <div class="stat-label">Лицензия</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">v1.0</div>
+                <div class="stat-label">Версия</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Keyboard Shortcuts -->
+    <section id="shortcuts" class="shortcuts">
+        <h2>Горячие клавиши</h2>
+        <div class="shortcuts-grid">
+            <div class="shortcut">
+                <span class="shortcut-key">Ctrl + B</span>
+                <span class="shortcut-desc">Установить фон в чатах</span>
+            </div>
+            <div class="shortcut">
+                <span class="shortcut-key">Ctrl + R</span>
+                <span class="shortcut-desc">Обновить приложение</span>
+            </div>
+            <div class="shortcut">
+                <span class="shortcut-key">F11</span>
+                <span class="shortcut-desc">Полный экран</span>
+            </div>
+            <div class="shortcut">
+                <span class="shortcut-key">Ctrl + Shift + C</span>
+                <span class="shortcut-desc">Удалить фон</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Support Section -->
+    <section id="support" class="support">
+        <h2>Нужна помощь?</h2>
+        <p>Напиши мне в Telegram и я помогу с любыми вопросами или проблемами</p>
+        <a href="https://t.me/exstazyas" class="support-btn" target="_blank">
+            💬 Написать в Telegram
+        </a>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p style="font-size: 16px; margin-bottom: 20px; color: #fff;">👻 NeoGram</p>
+            <div class="footer-links">
+                <a href="https://github.com" target="_blank">GitHub</a>
+                <a href="https://telegram.org" target="_blank">Telegram</a>
+                <a href="https://t.me/exstazyas" target="_blank">Поддержка</a>
+            </div>
+            <div class="footer-copy">
+                © 2026 NeoGram. Не связано с Telegram Messenger Inc. Создано с ❤️
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
